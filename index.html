@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.S. State &amp; Local Technology Policy Database, 2015-2024</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600;8..60,700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf9f6;
+  --text: #1a1a1a;
+  --text-secondary: #555;
+  --border: #d4d0c8;
+  --border-light: #e8e4dd;
+  --accent: #b44520;
+  --accent-hover: #932d10;
+  --surface: #fff;
+  --surface-alt: #f3f1ec;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+
+header {
+  border-bottom: 1px solid var(--border);
+  padding: 3rem 0 2.5rem;
+  background: var(--surface);
+}
+
+header h1 {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-weight: 700;
+  font-size: 2.4rem;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  max-width: 700px;
+}
+
+header .subtitle {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  margin-top: 0.75rem;
+  max-width: 680px;
+  line-height: 1.55;
+}
+
+header .meta {
+  margin-top: 1.25rem;
+  font-size: 0.82rem;
+  color: #888;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.02em;
+}
+
+/* Summary bar */
+.summary-bar {
+  display: flex;
+  gap: 0;
+  margin: 2.5rem 0 1.5rem;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 8px;
+  background: var(--border-light);
+}
+.summary-bar .segment {
+  transition: flex 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+.summary-bar .segment:hover { opacity: 0.8; }
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+}
+.summary-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.summary-card:hover {
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+.summary-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.summary-card .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.summary-card .label {
+  font-size: 0.82rem;
+  line-height: 1.3;
+  flex: 1;
+}
+.summary-card .count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Topic descriptions */
+.topic-detail {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  display: none;
+  animation: slideDown 0.2s ease;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.topic-detail.visible { display: block; }
+.topic-detail-inner { padding: 1.5rem 1.75rem; }
+.topic-detail h3 {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+.topic-detail .field-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin-bottom: 0.3rem;
+  margin-top: 1rem;
+}
+.topic-detail .field-label:first-of-type { margin-top: 0; }
+.topic-detail p {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-light);
+}
+.search-box {
+  flex: 1;
+  min-width: 240px;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-box:focus { border-color: var(--accent); }
+.search-box::placeholder { color: #aaa; }
+
+select.filter-select {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: var(--surface);
+  cursor: pointer;
+  outline: none;
+  color: var(--text);
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23555' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  padding-right: 2rem;
+}
+
+.result-count {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Table */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  background: var(--surface);
+  margin-bottom: 3rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+thead th {
+  background: var(--surface-alt);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  padding: 0.7rem 0.85rem;
+  border-bottom: 2px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+thead th:hover { color: var(--text); }
+thead th .sort-arrow { font-size: 0.65rem; margin-left: 0.3rem; opacity: 0.4; }
+thead th.sorted .sort-arrow { opacity: 1; color: var(--accent); }
+
+tbody tr {
+  border-bottom: 1px solid var(--border-light);
+  transition: background 0.1s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #faf8f4; }
+
+td {
+  padding: 0.65rem 0.85rem;
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+td.topic-cell {
+  white-space: nowrap;
+  font-weight: 500;
+}
+td.topic-cell .topic-badge {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+td.year-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+td.desc-cell { min-width: 280px; max-width: 400px; }
+
+td.policy-cell {
+  font-weight: 500;
+  min-width: 180px;
+}
+
+td.source-cell a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+td.source-cell a:hover { text-decoration: underline; }
+
+.status-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.status-active { background: #e6f4ea; color: #1a7f37; }
+.status-enjoined { background: #fef3c7; color: #92400e; }
+.status-amended { background: #e8eaf6; color: #3949ab; }
+.status-struck { background: #fde8e8; color: #b71c1c; }
+.status-other { background: var(--surface-alt); color: var(--text-secondary); }
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2rem 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+footer a { color: var(--accent); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+.hidden { display: none !important; }
+
+@media (max-width: 768px) {
+  .container { padding: 0 1rem; }
+  header h1 { font-size: 1.6rem; }
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .controls { flex-direction: column; }
+  .search-box { min-width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <h1>U.S. State &amp; Local Technology Policy Database</h1>
+    <p class="subtitle">134 policies across 11 technology areas enacted by state, city, and county governments from 2015 to 2024. Includes policy names, jurisdiction details, partisan control, implementation status, and source links.</p>
+    <p class="meta">134 entries &middot; 11 topic areas &middot; 2015&ndash;2024 &middot; CSV available in repository</p>
+  </div>
+</header>
+
+<main class="container">
+  <div class="summary-bar" id="summaryBar"></div>
+  <div class="summary-grid" id="summaryGrid"></div>
+  <div id="topicDetail" class="topic-detail"></div>
+
+  <div class="controls">
+    <input type="text" class="search-box" id="searchBox" placeholder="Search policies, jurisdictions, descriptions...">
+    <select class="filter-select" id="filterLevel">
+      <option value="">All levels</option>
+      <option value="State">State</option>
+      <option value="City">City</option>
+      <option value="County">County</option>
+      <option value="International">International</option>
+    </select>
+    <select class="filter-select" id="filterStatus">
+      <option value="">All statuses</option>
+      <option value="Active">Active</option>
+      <option value="Enjoined">Enjoined</option>
+      <option value="Amended">Amended</option>
+    </select>
+    <select class="filter-select" id="filterPartisan">
+      <option value="">All partisan control</option>
+      <option value="Democratic">Democratic</option>
+      <option value="Republican">Republican</option>
+      <option value="Nonpartisan">Nonpartisan</option>
+      <option value="Divided">Divided</option>
+    </select>
+    <span class="result-count" id="resultCount"></span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th data-col="topic">Topic <span class="sort-arrow">&#9650;</span></th>
+          <th data-col="jurisdiction">Jurisdiction <span class="sort-arrow">&#9650;</span></th>
+          <th data-col="year">Year <span class="sort-arrow">&#9650;</span></th>
+          <th data-col="policy">Policy <span class="sort-arrow">&#9650;</span></th>
+          <th data-col="description">Description <span class="sort-arrow">&#9650;</span></th>
+          <th data-col="partisan">Partisan Control <span class="sort-arrow">&#9650;</span></th>
+          <th data-col="status">Status <span class="sort-arrow">&#9650;</span></th>
+          <th data-col="agency">Agency <span class="sort-arrow">&#9650;</span></th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p>Data compiled March 2025. Download the <a href="tech_policy_database.csv">CSV</a> for analysis. Corrections and additions welcome via pull request.</p>
+  </div>
+</footer>
+
+<script>
+const DATA = [{"topic": "License Plate Readers", "level": "State", "jurisdiction": "New Hampshire", "year": 2016, "policy": "NH Rev. Stat. 261:75-b", "description": "Restricts ALPR use to law enforcement officers only; data retention limited to 3 minutes unless connected to active investigation.", "partisan": "Republican trifecta", "status": "Active", "agency": "NH Department of Safety", "source": "https://www.gencourt.state.nh.us/rsa/html/xxi/261/261-75-b.htm"}, {"topic": "License Plate Readers", "level": "State", "jurisdiction": "California", "year": 2015, "policy": "SB 34 (Civil Code 1798.90.5)", "description": "Requires all ALPR operators (public and private) to post a usage and privacy policy online; CHP data retention limited to 60 days.", "partisan": "Democratic trifecta", "status": "Active", "agency": "California Highway Patrol / California AG", "source": "https://www.eff.org/pages/california-automated-license-plate-reader-policies"}, {"topic": "License Plate Readers", "level": "State", "jurisdiction": "Vermont", "year": 2016, "policy": "23 VSA 1607-1608", "description": "Limits ALPR data retention to 18 months; requires annual reporting to legislature on ALPR usage.", "partisan": "Divided government", "status": "Active", "agency": "Vermont Intelligence Center", "source": "https://legislature.vermont.gov/statutes/section/23/013/01607"}, {"topic": "License Plate Readers", "level": "State", "jurisdiction": "Maine", "year": 2015, "policy": "29-A MRSA 2117-A", "description": "Limits ALPR data retention to 21 days unless part of active criminal investigation.", "partisan": "Divided government", "status": "Active", "agency": "Maine State Police", "source": "https://legislature.maine.gov/statutes/29-A/title29-Asec2117-A.html"}, {"topic": "License Plate Readers", "level": "State", "jurisdiction": "Utah", "year": 2015, "policy": "UCA 41-6a-2001 to 2005", "description": "Restricts ALPR data use to criminal justice purposes; limits retention; prohibits sale of data; requires audits.", "partisan": "Republican trifecta", "status": "Active", "agency": "Utah Dept. of Public Safety", "source": "https://le.utah.gov/xcode/Title41/Chapter6a/41-6a-S2003.html"}, {"topic": "License Plate Readers", "level": "State", "jurisdiction": "Colorado", "year": 2015, "policy": "CRS 24-72-113", "description": "Requires passive surveillance records (including ALPR data) to be destroyed within 3 years; access restricted after 1 year.", "partisan": "Divided government", "status": "Active", "agency": "Colorado State Patrol", "source": "https://leg.colorado.gov/sites/default/files/images/olls/crs2023-title-24.pdf"}, {"topic": "License Plate Readers", "level": "State", "jurisdiction": "Minnesota", "year": 2015, "policy": "MSA 13.824 and 626.8472", "description": "Classifies ALPR data as private; restricts use; requires law enforcement policies for ALPR use.", "partisan": "Divided government", "status": "Active", "agency": "Minnesota BCA", "source": "https://www.revisor.mn.gov/statutes/cite/13.824"}, {"topic": "License Plate Readers", "level": "State", "jurisdiction": "Nebraska", "year": 2015, "policy": "Neb. Rev. Stat. 60-3201 to 3209", "description": "Restricts ALPR use to governmental entities for criminal justice purposes; limits data retention; requires annual reporting.", "partisan": "Nonpartisan legislature", "status": "Active", "agency": "Nebraska Commission on Law Enforcement", "source": "https://nebraskalegislature.gov/laws/statutes.php?statute=60-3201"}, {"topic": "License Plate Readers", "level": "State", "jurisdiction": "Montana", "year": 2017, "policy": "MCA 46-5-117 to 118", "description": "Limits ALPR data retention; restricts use to law enforcement purposes; requires warrant for historical queries.", "partisan": "Republican trifecta", "status": "Active", "agency": "Montana DOJ", "source": "https://leg.mt.gov/bills/mca/title_0460/chapter_0050/part_0010/section_0170/0460-0050-0010-0170.html"}, {"topic": "License Plate Readers", "level": "State", "jurisdiction": "North Carolina", "year": 2015, "policy": "NCGS 20-183.30 to 183.33", "description": "Requires ALPR data retention limits of 90 days; mandates audits and reporting of system use.", "partisan": "Republican trifecta", "status": "Active", "agency": "NC DMV / Law Enforcement", "source": "https://www.ncleg.gov/EnactedLegislation/Statutes/PDF/ByArticle/Chapter_20/Article_3D.pdf"}, {"topic": "License Plate Readers", "level": "State", "jurisdiction": "Virginia", "year": 2024, "policy": "HB 1592 / VA Code 46.2-819.3:1", "description": "First statewide ALPR regulation in Virginia; defines authorized users; 21-day data retention; restricts data sharing.", "partisan": "Divided government", "status": "Active", "agency": "Virginia State Police", "source": "https://lis.virginia.gov/cgi-bin/legp604.exe?241+ful+HB1592ER"}, {"topic": "License Plate Readers", "level": "State", "jurisdiction": "Idaho", "year": 2024, "policy": "HB 563", "description": "Defines authorized ALPR use for law enforcement and traffic flow; requires training; prohibits non-law enforcement purposes.", "partisan": "Republican trifecta", "status": "Active", "agency": "Idaho State Police", "source": "https://legislature.idaho.gov/sessioninfo/2024/legislation/H0563/"}, {"topic": "License Plate Readers", "level": "State", "jurisdiction": "Georgia", "year": 2022, "policy": "Ga. Code Ann. 35-1-22 / 40-14-5 to 6", "description": "Limits ALPR data retention to 30 months; restricts sharing to criminal justice agencies; prohibits sale.", "partisan": "Republican trifecta", "status": "Active", "agency": "Georgia Bureau of Investigation", "source": "https://law.justia.com/codes/georgia/title-35/chapter-1/article-2/section-35-1-22/"}, {"topic": "License Plate Readers", "level": "State", "jurisdiction": "Arkansas", "year": 2017, "policy": "Ark. Code 12-12-1801 et seq.", "description": "Authorizes law enforcement ALPR use; restricts data sharing; 2025 amendment expanded access to private entities.", "partisan": "Republican trifecta", "status": "Active (amended 2025)", "agency": "Arkansas State Police", "source": "https://www.arkleg.state.ar.us/Acts/FTPDocument?path=%2FACTS%2F2017R%2FPublic%2F&file=1098.pdf"}, {"topic": "Facial Recognition Technology", "level": "City", "jurisdiction": "San Francisco, CA", "year": 2019, "policy": "Ordinance No. 107-19 (Stop Secret Surveillance)", "description": "First U.S. city to ban government use of facial recognition technology, including by police.", "partisan": "Democratic supermajority (nonpartisan council)", "status": "Active", "agency": "SF Board of Supervisors / Committee on Information Technology", "source": "https://sfbos.org/sites/default/files/o0107-19.pdf"}, {"topic": "Facial Recognition Technology", "level": "City", "jurisdiction": "Somerville, MA", "year": 2019, "policy": "Ordinance 2019-16", "description": "Second U.S. city to ban municipal use of facial recognition; includes biometric surveillance.", "partisan": "Nonpartisan council (Democratic-leaning)", "status": "Active", "agency": "City of Somerville", "source": "https://www.somervillema.gov/sites/default/files/1234_1.pdf"}, {"topic": "Facial Recognition Technology", "level": "City", "jurisdiction": "Oakland, CA", "year": 2019, "policy": "Ordinance No. 13563", "description": "Bans city acquisition and use of facial recognition technology as amendment to existing surveillance ordinance.", "partisan": "Nonpartisan council (Democratic-leaning)", "status": "Active", "agency": "City of Oakland Privacy Advisory Commission", "source": "https://oaklandprivacy.org/oakland-passes-facial-recognition-ban/"}, {"topic": "Facial Recognition Technology", "level": "City", "jurisdiction": "Boston, MA", "year": 2020, "policy": "Ordinance (Docket #0685)", "description": "Bans city use of facial recognition and prohibits police from requesting other agencies use it on their behalf.", "partisan": "Nonpartisan council (Democratic-leaning)", "status": "Active", "agency": "City of Boston", "source": "https://www.boston.gov/news/boston-bans-use-facial-recognition-technology"}, {"topic": "Facial Recognition Technology", "level": "City", "jurisdiction": "Portland, OR", "year": 2020, "policy": "Ordinance Nos. 190114 / 190115", "description": "Bans both government and private-sector use of facial recognition in places of public accommodation; broadest U.S. ban.", "partisan": "Nonpartisan council (Democratic-leaning)", "status": "Active", "agency": "City of Portland", "source": "https://www.portland.gov/smart-city-pdx/facial-recognition-ban"}, {"topic": "Facial Recognition Technology", "level": "City", "jurisdiction": "Minneapolis, MN", "year": 2021, "policy": "Ordinance No. 2021-017", "description": "Bans city departments from procuring or using facial recognition technology; bans use of data obtained from it.", "partisan": "Nonpartisan council (Democratic-leaning)", "status": "Active", "agency": "City of Minneapolis", "source": "https://lims.minneapolismn.gov/RCA/RacialEquity/7483"}, {"topic": "Facial Recognition Technology", "level": "City", "jurisdiction": "New Orleans, LA", "year": 2020, "policy": "Ordinance No. 033271 MCS", "description": "Bans city use of facial recognition and predictive policing technology. Amended in 2022 to allow limited use for violent crimes.", "partisan": "Democratic city council", "status": "Amended (2022)", "agency": "City of New Orleans OPCD", "source": "https://thelensnola.org/2020/07/08/city-council-considers-ordinance-to-ban-facial-recognition/"}, {"topic": "Facial Recognition Technology", "level": "City", "jurisdiction": "Pittsburgh, PA", "year": 2020, "policy": "Ordinance No. 2020-0833", "description": "Bans city use of facial recognition technology by city departments.", "partisan": "Democratic council", "status": "Active", "agency": "City of Pittsburgh", "source": "https://pittsburgh.legistar.com/LegislationDetail.aspx?ID=4599810"}, {"topic": "Facial Recognition Technology", "level": "City", "jurisdiction": "Santa Cruz, CA", "year": 2020, "policy": "Ordinance", "description": "Bans municipal use of facial recognition technology and predictive policing tools.", "partisan": "Nonpartisan council", "status": "Active", "agency": "City of Santa Cruz", "source": "https://www.cityofsantacruz.com/government/city-council"}, {"topic": "Facial Recognition Technology", "level": "County", "jurisdiction": "King County, WA", "year": 2021, "policy": "Ordinance 19364", "description": "Bans county use of facial recognition with narrow exceptions for redacting recordings; requires council approval for surveillance tech.", "partisan": "Democratic council", "status": "Active", "agency": "King County Council", "source": "https://mkcclegisearch.kingcounty.gov/LegislationDetail.aspx?ID=4983750"}, {"topic": "Facial Recognition Technology", "level": "State", "jurisdiction": "Virginia", "year": 2021, "policy": "HB 2031 / SB 1385", "description": "Banned local law enforcement from using facial recognition without legislative approval. Amended in 2022 to allow limited use.", "partisan": "Divided government", "status": "Amended (2022)", "agency": "Virginia General Assembly", "source": "https://lis.virginia.gov/cgi-bin/legp604.exe?211+ful+HB2031ER"}, {"topic": "Facial Recognition Technology", "level": "State", "jurisdiction": "Maryland", "year": 2024, "policy": "HB 33", "description": "Limits law enforcement use of facial recognition to serious crimes; requires notice; prohibits sole-basis arrests.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Maryland AG", "source": "https://mgaleg.maryland.gov/mgawebsite/Legislation/Details/hb0033"}, {"topic": "Facial Recognition Technology", "level": "State", "jurisdiction": "Montana", "year": 2023, "policy": "SB 389", "description": "Requires warrant for law enforcement facial recognition use; notice to defendants; limits to serious crimes.", "partisan": "Republican trifecta", "status": "Active", "agency": "Montana DOJ", "source": "https://leg.mt.gov/bills/2023/billpdf/SB0389.pdf"}, {"topic": "Facial Recognition Technology", "level": "State", "jurisdiction": "Washington", "year": 2020, "policy": "SB 6280", "description": "Requires government agencies to file notice and test for accuracy and bias before deploying facial recognition; prohibits sole-basis arrests.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Washington state agencies", "source": "https://app.leg.wa.gov/billsummary?BillNumber=6280&Year=2019"}, {"topic": "Surveillance Oversight", "level": "City", "jurisdiction": "Seattle, WA", "year": 2017, "policy": "Ordinance 125376 (Surveillance Ordinance)", "description": "Requires city council approval before any city department acquires surveillance technology; mandates impact assessments.", "partisan": "Nonpartisan council (Democratic-leaning)", "status": "Active", "agency": "Seattle IT / City Council", "source": "https://seattle.gov/tech/initiatives/privacy/surveillance-technologies"}, {"topic": "Surveillance Oversight", "level": "City", "jurisdiction": "Oakland, CA", "year": 2018, "policy": "Ordinance No. 13489 (Surveillance and Community Safety)", "description": "Requires city council approval and community impact reports before acquiring surveillance equipment.", "partisan": "Nonpartisan council (Democratic-leaning)", "status": "Active", "agency": "Oakland Privacy Advisory Commission", "source": "https://oaklandprivacy.org/surveillance-oversight-ordinance/"}, {"topic": "Surveillance Oversight", "level": "City", "jurisdiction": "Nashville, TN", "year": 2017, "policy": "Ordinance BL2017-640", "description": "Requires Metro Council approval before police or other agencies acquire surveillance technologies.", "partisan": "Nonpartisan council", "status": "Active", "agency": "Nashville Metro Council", "source": "https://www.nashville.gov/departments/law/metro-codes"}, {"topic": "Surveillance Oversight", "level": "City", "jurisdiction": "Cambridge, MA", "year": 2018, "policy": "Surveillance Technology Ordinance", "description": "Requires city council authorization for surveillance technology acquisition; annual reporting.", "partisan": "Nonpartisan council (Democratic-leaning)", "status": "Active", "agency": "City of Cambridge", "source": "https://www.cambridgema.gov/Departments/citycouncil"}, {"topic": "Surveillance Oversight", "level": "City", "jurisdiction": "San Francisco, CA", "year": 2019, "policy": "Ordinance No. 107-19 (Stop Secret Surveillance)", "description": "Requires board of supervisors approval for surveillance tech; bans facial recognition; mandates annual reports.", "partisan": "Democratic supermajority", "status": "Active", "agency": "SF Committee on Information Technology", "source": "https://sfbos.org/sites/default/files/o0107-19.pdf"}, {"topic": "Surveillance Oversight", "level": "City", "jurisdiction": "Davis, CA", "year": 2018, "policy": "Ordinance 2564", "description": "Requires city council approval before acquiring surveillance technology; first small city to adopt CCOPS model.", "partisan": "Nonpartisan council", "status": "Active", "agency": "City of Davis", "source": "https://www.cityofdavis.org/city-hall/city-clerk/ordinances"}, {"topic": "Surveillance Oversight", "level": "County", "jurisdiction": "San Diego County, CA", "year": 2020, "policy": "Transparency and Responsible Use of Surveillance Technology (TRUST)", "description": "Requires public review and board of supervisors approval before county agencies acquire surveillance technology.", "partisan": "Nonpartisan board", "status": "Active (compliance disputed)", "agency": "San Diego County Board of Supervisors", "source": "https://www.sandiegocounty.gov/content/sdc/cao/oerj/TRUST.html"}, {"topic": "Surveillance Oversight", "level": "State", "jurisdiction": "California", "year": 2020, "policy": "AB 1215 (Body Camera Accountability Act)", "description": "Three-year moratorium on use of facial recognition and biometric surveillance in police body cameras statewide.", "partisan": "Democratic trifecta", "status": "Expired (2023); renewed via AB 642", "agency": "California Legislature", "source": "https://leginfo.legislature.ca.gov/faces/billTextClient.xhtml?bill_id=201920200AB1215"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "California", "year": 2018, "policy": "CCPA (AB 375)", "description": "First comprehensive U.S. state consumer privacy law; grants rights to access, delete, and opt out of sale of personal data.", "partisan": "Democratic trifecta", "status": "Active (amended by CPRA)", "agency": "California AG / California Privacy Protection Agency", "source": "https://oag.ca.gov/privacy/ccpa"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "California", "year": 2020, "policy": "CPRA (Proposition 24)", "description": "Ballot initiative amending and expanding CCPA; created California Privacy Protection Agency; added data minimization and correction rights.", "partisan": "Ballot initiative (56.2% yes)", "status": "Active", "agency": "California Privacy Protection Agency", "source": "https://cppa.ca.gov/"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Virginia", "year": 2021, "policy": "VCDPA (SB 1392)", "description": "Second state comprehensive privacy law; grants consumer rights; became model for many subsequent state laws.", "partisan": "Divided government", "status": "Active (amended 2024)", "agency": "Virginia AG", "source": "https://law.lis.virginia.gov/vacodefull/title59.1/chapter53/"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Colorado", "year": 2021, "policy": "CPA (SB 21-190)", "description": "Third state comprehensive privacy law; applies to nonprofits; 2024 amendment added neural data as sensitive data category.", "partisan": "Democratic trifecta", "status": "Active (amended 2024)", "agency": "Colorado AG", "source": "https://coag.gov/resources/colorado-privacy-act/"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Connecticut", "year": 2022, "policy": "CTDPA (SB 6)", "description": "Fifth state comprehensive privacy law; later amended (SB 3, 2023) to add children's data protections.", "partisan": "Democratic trifecta", "status": "Active (amended 2023)", "agency": "Connecticut AG", "source": "https://www.cga.ct.gov/2022/ACT/PA/PDF/2022PA-00015-R00SB-00006-PA.PDF"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Utah", "year": 2022, "policy": "UCPA (SB 227)", "description": "Fourth state comprehensive privacy law; business-friendly approach with fewer consumer rights than California.", "partisan": "Republican trifecta", "status": "Active", "agency": "Utah AG", "source": "https://le.utah.gov/~2022/bills/sbillenr/SB0227.pdf"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Iowa", "year": 2023, "policy": "ICDPA (SF 262)", "description": "Sixth state comprehensive privacy law; narrower consumer rights; no right to correct data.", "partisan": "Republican trifecta", "status": "Active", "agency": "Iowa AG", "source": "https://www.legis.iowa.gov/legislation/BillBook?ba=SF%20262&ga=90"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Indiana", "year": 2023, "policy": "INCDPA (SB 5)", "description": "Modeled on Virginia/Colorado framework; effective January 1, 2026.", "partisan": "Republican trifecta", "status": "Active", "agency": "Indiana AG", "source": "https://iga.in.gov/legislative/2023/bills/senate/5"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Tennessee", "year": 2023, "policy": "TIPA (HB 1181)", "description": "Tennessee Information Protection Act; modeled on Virginia framework.", "partisan": "Republican trifecta", "status": "Active", "agency": "Tennessee AG", "source": "https://www.tn.gov/attorneygeneral/working-for-tennessee/consumer/resources/tennessee-information-protection-act.html"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Texas", "year": 2023, "policy": "TDPSA (HB 4)", "description": "Comprehensive privacy law for second-largest state; no revenue threshold; small business exemption.", "partisan": "Republican trifecta", "status": "Active", "agency": "Texas AG", "source": "https://capitol.texas.gov/BillLookup/History.aspx?LegSess=88R&Bill=HB4"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Montana", "year": 2023, "policy": "MTCDPA (SB 384)", "description": "Low population threshold (50,000 consumers); includes nonprofits.", "partisan": "Republican trifecta", "status": "Active", "agency": "Montana AG", "source": "https://leg.mt.gov/bills/2023/billpdf/SB0384.pdf"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Oregon", "year": 2023, "policy": "OCPA (SB 619)", "description": "Among strongest state privacy laws; applies to nonprofits; includes biometric and sensitive data protections.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Oregon AG", "source": "https://olis.oregonlegislature.gov/liz/2023R1/Measures/Overview/SB619"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Delaware", "year": 2023, "policy": "DPDPA (HB 154)", "description": "Applies to more businesses than most state laws; opt-in consent for minors under 17 (highest threshold).", "partisan": "Democratic trifecta", "status": "Active", "agency": "Delaware AG", "source": "https://legis.delaware.gov/BillDetail?legislationId=140388"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "New Hampshire", "year": 2024, "policy": "NHPA (SB 255)", "description": "Lower applicability thresholds (35,000 consumers); modeled on early Connecticut law.", "partisan": "Divided government", "status": "Active", "agency": "New Hampshire AG", "source": "https://www.gencourt.state.nh.us/bill_status/billinfo.aspx?id=1762&inflession=2"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "New Jersey", "year": 2024, "policy": "NJDPA (SB 332)", "description": "Comprehensive privacy law with opt-in consent for sensitive data processing.", "partisan": "Democratic trifecta", "status": "Active", "agency": "New Jersey AG", "source": "https://www.njleg.state.nj.us/bill-search/2024/S332"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Kentucky", "year": 2024, "policy": "KCDPA (HB 15)", "description": "Modeled on Virginia framework; effective January 1, 2026.", "partisan": "Republican trifecta", "status": "Active", "agency": "Kentucky AG", "source": "https://apps.legislature.ky.gov/record/24rs/hb15.html"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Maryland", "year": 2024, "policy": "MODPA (SB 541)", "description": "Among strongest state privacy laws; strong data minimization; applies to nonprofits.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Maryland AG", "source": "https://mgaleg.maryland.gov/mgawebsite/Legislation/Details/sb0541"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Minnesota", "year": 2024, "policy": "MCDPA (HF 4757)", "description": "Comprehensive privacy law with consumer rights to access, correct, delete, and port data.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Minnesota AG", "source": "https://www.revisor.mn.gov/laws/2024/0/Session+Law/Chapter/121/"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Nebraska", "year": 2024, "policy": "Nebraska Data Privacy Act (LB 1074)", "description": "Modeled on Texas framework.", "partisan": "Nonpartisan legislature (Republican-leaning)", "status": "Active", "agency": "Nebraska AG", "source": "https://nebraskalegislature.gov/bills/view_bill.php?DocumentID=55201"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Rhode Island", "year": 2024, "policy": "RIDTPPA", "description": "Twentieth state comprehensive privacy law; no cure period for violations.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Rhode Island AG", "source": "https://webserver.rilegislature.gov/billtext24/SenateText24/S2500.pdf"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Illinois", "year": 2008, "policy": "BIPA (740 ILCS 14)", "description": "Biometric Information Privacy Act; private right of action for biometric data violations; generated billions in litigation.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Illinois AG / Private litigation", "source": "https://www.ilga.gov/legislation/ilcs/ilcs3.asp?ActID=3004"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Washington", "year": 2023, "policy": "My Health My Data Act (SB 5693)", "description": "Broad health data privacy law covering consumer health data beyond HIPAA; private right of action.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Washington AG", "source": "https://app.leg.wa.gov/billsummary?BillNumber=5693&Year=2023"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "California", "year": 2023, "policy": "California Delete Act (SB 362)", "description": "Requires data brokers to register; creates one-click mechanism for consumers to request deletion from all registered brokers.", "partisan": "Democratic trifecta", "status": "Active", "agency": "California Privacy Protection Agency", "source": "https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202320240SB362"}, {"topic": "Consumer Data Privacy", "level": "State", "jurisdiction": "Vermont", "year": 2018, "policy": "Data Broker Registration Act (9 VSA 2430)", "description": "First state to require data brokers to register annually with the Secretary of State.", "partisan": "Divided government", "status": "Active", "agency": "Vermont Secretary of State", "source": "https://legislature.vermont.gov/statutes/chapter/09/062"}, {"topic": "Gig Economy Worker Classification", "level": "State", "jurisdiction": "California", "year": 2019, "policy": "AB 5", "description": "Codified ABC test for worker classification; presumption of employee status. Triggered national debate on gig worker rights.", "partisan": "Democratic trifecta", "status": "Active (partially overridden by Prop 22)", "agency": "California DLSE", "source": "https://leginfo.legislature.ca.gov/faces/billTextClient.xhtml?bill_id=201920200AB5"}, {"topic": "Gig Economy Worker Classification", "level": "State", "jurisdiction": "California", "year": 2020, "policy": "Proposition 22", "description": "Ballot initiative ($200M+ campaign) exempting app-based drivers from AB5; provides minimum earnings and benefits.", "partisan": "Ballot initiative (58.6% yes)", "status": "Active (upheld by CA Supreme Court 2024)", "agency": "California DLSE", "source": "https://voterguide.sos.ca.gov/propositions/22/"}, {"topic": "Gig Economy Worker Classification", "level": "State", "jurisdiction": "Washington", "year": 2022, "policy": "HB 2076", "description": "Establishes framework for TNC (ride-hail) drivers; minimum per-mile/per-minute pay; paid sick leave; workers' comp.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Washington L&I / UTC", "source": "https://app.leg.wa.gov/billsummary?BillNumber=2076&Year=2021"}, {"topic": "Gig Economy Worker Classification", "level": "City", "jurisdiction": "Seattle, WA", "year": 2020, "policy": "Ordinance 126094 (TNC Driver Min. Compensation)", "description": "Established minimum per-trip compensation for Uber/Lyft drivers; first U.S. city to set rideshare driver minimum wage.", "partisan": "Nonpartisan council (Democratic-leaning)", "status": "Active", "agency": "Seattle Office of Labor Standards", "source": "https://www.seattle.gov/laborstandards/ordinances/transportation-network-company-702"}, {"topic": "Gig Economy Worker Classification", "level": "City", "jurisdiction": "Seattle, WA", "year": 2022, "policy": "SMC 8.37 (App-Based Worker Minimum Payment)", "description": "Minimum payment standards for app-based delivery workers; paid sick time; transparency requirements. Effective Jan 2024.", "partisan": "Nonpartisan council (Democratic-leaning)", "status": "Active", "agency": "Seattle Office of Labor Standards", "source": "https://www.seattle.gov/laborstandards/ordinances/app-based-worker-ordinances/app-based-worker-minimum-payment-ordinance"}, {"topic": "Gig Economy Worker Classification", "level": "City", "jurisdiction": "New York City, NY", "year": 2023, "policy": "Delivery Worker Pay Rate (DCWP Rule)", "description": "Established minimum pay rate for app-based food delivery workers ($17.96/hr, rising to $19.96 by April 2025).", "partisan": "Democratic council", "status": "Active", "agency": "NYC Dept. of Consumer and Worker Protection", "source": "https://www.nyc.gov/site/dca/workers/workersrights/delivery-worker-pay.page"}, {"topic": "Gig Economy Worker Classification", "level": "City", "jurisdiction": "New York City, NY", "year": 2021, "policy": "Int. 2289-A to 2296-A (Delivery Worker Protections)", "description": "Suite of bills granting food delivery workers rights: restroom access, trip transparency, maximum distance settings.", "partisan": "Democratic council", "status": "Active", "agency": "NYC DCWP", "source": "https://council.nyc.gov/press/2021/09/23/2086/"}, {"topic": "Gig Economy Worker Classification", "level": "State", "jurisdiction": "Massachusetts", "year": 2024, "policy": "AG Lawsuit / Proposed Ballot", "description": "AG sued Uber/Lyft for misclassification (2020); industry-backed ballot initiative to create contractor-plus category withdrew (2024).", "partisan": "Democratic trifecta", "status": "Ongoing (litigation)", "agency": "Massachusetts AG", "source": "https://www.mass.gov/news/ag-healey-sues-uber-and-lyft"}, {"topic": "Gig Economy Worker Classification", "level": "City", "jurisdiction": "Minneapolis, MN", "year": 2024, "policy": "Ordinance (Rideshare Driver Minimum Pay)", "description": "Established minimum pay per ride for Uber/Lyft drivers; triggered threats from companies to leave the market.", "partisan": "Nonpartisan council (Democratic-leaning)", "status": "Active (amended)", "agency": "Minneapolis City Council", "source": "https://www.minneapolismn.gov/government/city-council/"}, {"topic": "Gig Economy Worker Classification", "level": "State", "jurisdiction": "Connecticut", "year": 2021, "policy": "HB 6343", "description": "Established task force on gig economy worker classification; studied portable benefits models.", "partisan": "Democratic trifecta", "status": "Active (study)", "agency": "Connecticut Dept. of Labor", "source": "https://www.cga.ct.gov/2021/ACT/PA/PDF/2021PA-00069-R00HB-06343-PA.PDF"}, {"topic": "Short-Term Rental Regulation", "level": "City", "jurisdiction": "New York City, NY", "year": 2022, "policy": "Local Law 18 of 2022", "description": "Requires STR hosts to register with city; must be primary residence; host must be present; platforms must verify registration. Reduced Airbnb listings by 90%+.", "partisan": "Democratic council", "status": "Active", "agency": "NYC Office of Special Enforcement", "source": "https://www.nyc.gov/site/specialenforcement/registration-and-enforcement/registration.page"}, {"topic": "Short-Term Rental Regulation", "level": "City", "jurisdiction": "San Francisco, CA", "year": 2015, "policy": "Ordinance 218-14 (Office of Short-Term Rentals)", "description": "Legalized and regulated STRs; primary residence only; 90-day cap for unhosted rentals; mandatory registration.", "partisan": "Democratic supermajority", "status": "Active (amended multiple times)", "agency": "SF Office of Short-Term Rentals", "source": "https://www.sf.gov/topics/short-term-rentals"}, {"topic": "Short-Term Rental Regulation", "level": "City", "jurisdiction": "Santa Monica, CA", "year": 2015, "policy": "Ordinance 2535", "description": "Effectively banned whole-home vacation rentals; only home-sharing (host present) allowed; wiped out ~80% of Airbnb listings.", "partisan": "Nonpartisan council", "status": "Active", "agency": "City of Santa Monica", "source": "https://www.santamonica.gov/housing/short-term-rentals"}, {"topic": "Short-Term Rental Regulation", "level": "City", "jurisdiction": "Nashville, TN", "year": 2017, "policy": "Ordinance BL2017-608", "description": "Banned new non-owner-occupied STR permits in residential zones; phased out existing ones by 2020.", "partisan": "Nonpartisan council", "status": "Active", "agency": "Nashville Metro Codes Department", "source": "https://www.nashville.gov/departments/codes/short-term-rental-permits"}, {"topic": "Short-Term Rental Regulation", "level": "City", "jurisdiction": "Austin, TX", "year": 2016, "policy": "Ordinance 20160223-A.1 (STR Amendments)", "description": "Prohibited new non-owner-occupied STR permits in residential zones; all Type-2 permits expired by 2022.", "partisan": "Nonpartisan council", "status": "Active", "agency": "Austin Code Department", "source": "https://www.austintexas.gov/department/short-term-rental-licensing"}, {"topic": "Short-Term Rental Regulation", "level": "City", "jurisdiction": "Los Angeles, CA", "year": 2018, "policy": "Home-Sharing Ordinance (CF 14-1635-S2)", "description": "Limits STRs to primary residence; 120-day annual cap; registration and platform accountability requirements.", "partisan": "Nonpartisan council (Democratic-leaning)", "status": "Active", "agency": "LA Dept. of City Planning", "source": "https://planning.lacity.gov/plans-policies/home-sharing"}, {"topic": "Short-Term Rental Regulation", "level": "City", "jurisdiction": "Chicago, IL", "year": 2016, "policy": "Shared Housing Ordinance", "description": "Registration requirement; prohibits single-night rentals; three-strikes rule for nuisance violations.", "partisan": "Democratic council", "status": "Active", "agency": "Chicago BACP", "source": "https://www.chicago.gov/city/en/depts/bacp/provdrs/bus/svcs/sharedhousing.html"}, {"topic": "Short-Term Rental Regulation", "level": "City", "jurisdiction": "Honolulu, HI", "year": 2022, "policy": "Ordinance 22-7 (Bill 41)", "description": "Raised minimum rental period to 90 days in most residential areas; effectively banned most STRs.", "partisan": "Nonpartisan council", "status": "Active", "agency": "Dept. of Planning and Permitting", "source": "https://www.honolulu.gov/dpp/short-term-rentals.html"}, {"topic": "Short-Term Rental Regulation", "level": "State", "jurisdiction": "New York", "year": 2024, "policy": "S.885C/A.4130C (Statewide STR Framework)", "description": "First statewide STR framework in U.S.; requires platform tax collection/remittance and quarterly reporting.", "partisan": "Democratic trifecta", "status": "Active (effective 2025)", "agency": "NY Dept. of Taxation and Finance", "source": "https://www.nysenate.gov/legislation/bills/2023/S885C"}, {"topic": "Short-Term Rental Regulation", "level": "City", "jurisdiction": "Barcelona, Spain", "year": 2024, "policy": "Short-Term Rental License Phase-Out", "description": "Announced phase-out of all 10,000+ tourist apartment licenses by November 2028.", "partisan": "Left coalition", "status": "Active (implementation in progress)", "agency": "Barcelona City Council", "source": "https://www.barcelona.cat/infobarcelona/en/tema/housing/the-city-will-recover-10000-properties-used-as-tourist-flats_1387043.html"}, {"topic": "Short-Term Rental Regulation", "level": "City", "jurisdiction": "Florence, Italy", "year": 2023, "policy": "Historic Center STR Ban", "description": "Banned new short-term rental licenses in UNESCO-listed historic city center.", "partisan": "Center-left", "status": "Active", "agency": "Florence City Council", "source": "https://www.comune.fi.it/"}, {"topic": "Autonomous Vehicles", "level": "State", "jurisdiction": "Nevada", "year": 2011, "policy": "AB 511", "description": "First U.S. state to authorize operation of autonomous vehicles; established testing framework.", "partisan": "Divided government", "status": "Active (amended)", "agency": "Nevada DMV", "source": "https://www.leg.state.nv.us/Session/76th2011/Bills/AB/AB511_EN.pdf"}, {"topic": "Autonomous Vehicles", "level": "State", "jurisdiction": "California", "year": 2012, "policy": "SB 1298", "description": "Authorized DMV to develop regulations for testing and deployment of autonomous vehicles on public roads.", "partisan": "Democratic trifecta", "status": "Active (amended multiple times)", "agency": "California DMV Autonomous Vehicles Branch", "source": "https://www.dmv.ca.gov/portal/vehicle-industry-services/autonomous-vehicles/"}, {"topic": "Autonomous Vehicles", "level": "State", "jurisdiction": "Arizona", "year": 2015, "policy": "Executive Order 2015-09", "description": "Governor Ducey issued executive order enabling AV testing without prior permits; made Arizona most permissive state.", "partisan": "Republican trifecta", "status": "Active (codified 2018 via EO 2018-04)", "agency": "Arizona DOT", "source": "https://azgovernor.gov/governor/news/2015/08/governor-ducey-issues-executive-order-advancement-self-driving-vehicles-arizona"}, {"topic": "Autonomous Vehicles", "level": "State", "jurisdiction": "Texas", "year": 2017, "policy": "SB 2205", "description": "Authorized operation of AVs without conventional driver; defined vehicle owner as 'operator' for liability purposes.", "partisan": "Republican trifecta", "status": "Active", "agency": "Texas DMV / TxDOT", "source": "https://capitol.texas.gov/BillLookup/History.aspx?LegSess=85R&Bill=SB2205"}, {"topic": "Autonomous Vehicles", "level": "State", "jurisdiction": "Florida", "year": 2019, "policy": "HB 311", "description": "Authorized fully autonomous vehicles to operate on Florida roads without human driver present.", "partisan": "Republican trifecta", "status": "Active", "agency": "Florida DHSMV", "source": "https://www.flsenate.gov/Session/Bill/2019/311"}, {"topic": "Autonomous Vehicles", "level": "State", "jurisdiction": "California", "year": 2024, "policy": "SB 915 (AV Safety Accountability)", "description": "Requires manufacturers to continuously monitor every AV on road; designate remote human operator; allows local enforcement of traffic laws.", "partisan": "Democratic trifecta", "status": "Active", "agency": "California DMV / CPUC", "source": "https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202320240SB915"}, {"topic": "Autonomous Vehicles", "level": "City", "jurisdiction": "San Francisco, CA", "year": 2023, "policy": "Resolution opposing CPUC AV expansion", "description": "Board of Supervisors passed resolution opposing CPUC approval of expanded Waymo/Cruise commercial robotaxi service.", "partisan": "Democratic supermajority", "status": "Advisory (non-binding)", "agency": "SF Board of Supervisors", "source": "https://sfbos.org/"}, {"topic": "Autonomous Vehicles", "level": "State", "jurisdiction": "Pennsylvania", "year": 2022, "policy": "Act 143 (AV Testing)", "description": "Authorized testing of highly automated vehicles with human safety driver; established PennDOT oversight.", "partisan": "Divided government", "status": "Active", "agency": "PennDOT", "source": "https://www.legis.state.pa.us/cfdocs/legis/li/uconsCheck.cfm?yr=2022&sessInd=0&act=143"}, {"topic": "Autonomous Vehicles", "level": "State", "jurisdiction": "Georgia", "year": 2017, "policy": "SB 219", "description": "Authorized AVs without human driver; established insurance requirements.", "partisan": "Republican trifecta", "status": "Active", "agency": "Georgia DDS", "source": "https://www.legis.ga.gov/legislation/20012"}, {"topic": "Autonomous Vehicles", "level": "State", "jurisdiction": "Michigan", "year": 2016, "policy": "SB 995-999 (SAVE Act package)", "description": "Comprehensive AV legislation allowing driverless testing and deployment; established regulatory framework.", "partisan": "Republican trifecta", "status": "Active", "agency": "Michigan Secretary of State / MDOT", "source": "https://www.legislature.mi.gov/documents/2015-2016/publicact/htm/2016-PA-0332.htm"}, {"topic": "Broadband / Digital Divide", "level": "City", "jurisdiction": "Chattanooga, TN", "year": 2015, "policy": "EPB Fiber Optics (Expansion)", "description": "City-owned electric utility expanded 10 Gbps fiber network; became national model for municipal broadband.", "partisan": "Nonpartisan", "status": "Active", "agency": "EPB (Electric Power Board)", "source": "https://epb.com/fiber-optics/"}, {"topic": "Broadband / Digital Divide", "level": "State", "jurisdiction": "Colorado", "year": 2023, "policy": "SB 23-152", "description": "Removed barriers to municipal broadband; authorized local governments to provide broadband service.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Colorado Broadband Office", "source": "https://leg.colorado.gov/bills/sb23-152"}, {"topic": "Broadband / Digital Divide", "level": "State", "jurisdiction": "Washington", "year": 2021, "policy": "SB 5383", "description": "Authorized port districts and public utility districts to provide broadband services directly to consumers.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Washington State Broadband Office", "source": "https://app.leg.wa.gov/billsummary?BillNumber=5383&Year=2021"}, {"topic": "Broadband / Digital Divide", "level": "State", "jurisdiction": "North Carolina", "year": 2023, "policy": "HB 259 (FIBER NC Act)", "description": "Relaxed restrictions on municipal broadband that had been in place since 2011; allowed electric cooperatives to offer broadband.", "partisan": "Republican trifecta (bipartisan vote)", "status": "Active", "agency": "NC Dept. of IT / Broadband Office", "source": "https://www.ncleg.gov/Sessions/2023/Bills/House/PDF/H259v7.pdf"}, {"topic": "Broadband / Digital Divide", "level": "State", "jurisdiction": "Maine", "year": 2021, "policy": "LD 1484 (Maine Connectivity Authority)", "description": "Created independent state authority to coordinate broadband expansion and manage federal broadband funds.", "partisan": "Divided government", "status": "Active", "agency": "Maine Connectivity Authority", "source": "https://www.maineconnectivity.org/"}, {"topic": "Broadband / Digital Divide", "level": "State", "jurisdiction": "Virginia", "year": 2020, "policy": "HB 1280 (Virginia Broadband Advisory Council)", "description": "Created state broadband office and advisory council; authorized $700M+ in state broadband funding.", "partisan": "Divided government", "status": "Active", "agency": "Virginia Dept. of Housing and Community Development", "source": "https://www.dhcd.virginia.gov/broadband"}, {"topic": "Broadband / Digital Divide", "level": "City", "jurisdiction": "Fort Collins, CO", "year": 2017, "policy": "Ballot Measure 2B", "description": "Voters approved city to build and operate municipal broadband network after overcoming state preemption law.", "partisan": "Nonpartisan", "status": "Active (Connexion network operational)", "agency": "Fort Collins Connexion", "source": "https://www.fcgov.com/connexion/"}, {"topic": "Broadband / Digital Divide", "level": "State", "jurisdiction": "California", "year": 2021, "policy": "SB 156 ($6B Broadband Package)", "description": "Largest state broadband investment; created open-access middle-mile network; funded last-mile grants.", "partisan": "Democratic trifecta", "status": "Active", "agency": "California Dept. of Technology / CPUC", "source": "https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202120220SB156"}, {"topic": "Broadband / Digital Divide", "level": "State", "jurisdiction": "New York", "year": 2021, "policy": "Affordable Broadband Act", "description": "Required ISPs to offer $15/month broadband plans to qualifying low-income households. Blocked by court as preempted.", "partisan": "Democratic trifecta", "status": "Struck down (2021; federal preemption)", "agency": "NY Public Service Commission", "source": "https://www.nysenate.gov/legislation/bills/2021/A8805"}, {"topic": "Algorithmic Decision-Making", "level": "City", "jurisdiction": "New York City, NY", "year": 2021, "policy": "Local Law 144 (Automated Employment Decision Tools)", "description": "First U.S. law requiring bias audits for AI hiring tools; mandates notice to candidates; enforced from July 2023.", "partisan": "Democratic council", "status": "Active", "agency": "NYC Dept. of Consumer and Worker Protection", "source": "https://legistar.council.nyc.gov/LegislationDetail.aspx?ID=4344524"}, {"topic": "Algorithmic Decision-Making", "level": "State", "jurisdiction": "Illinois", "year": 2019, "policy": "AI Video Interview Act (HB 2557)", "description": "First U.S. law regulating AI in hiring; requires consent for AI-analyzed video interviews; right to deletion.", "partisan": "Democratic trifecta", "status": "Active (expanded by HB 3773, 2024)", "agency": "Illinois DCEO", "source": "https://www.ilga.gov/legislation/publicacts/101/PDF/101-0260.pdf"}, {"topic": "Algorithmic Decision-Making", "level": "State", "jurisdiction": "Illinois", "year": 2024, "policy": "HB 3773 (AI in Employment Amendment)", "description": "Expanded AI hiring regulation beyond video interviews; prohibits AI that discriminates based on protected class.", "partisan": "Democratic trifecta", "status": "Active (effective Jan 2026)", "agency": "Illinois DCEO", "source": "https://www.ilga.gov/legislation/publicacts/103/PDF/103-0804.pdf"}, {"topic": "Algorithmic Decision-Making", "level": "State", "jurisdiction": "Colorado", "year": 2024, "policy": "SB 24-205 (AI Consumer Protections)", "description": "First state comprehensive AI law; requires developers and deployers of high-risk AI to use reasonable care to avoid algorithmic discrimination.", "partisan": "Democratic trifecta", "status": "Active (effective Feb 2026)", "agency": "Colorado AG", "source": "https://leg.colorado.gov/bills/sb24-205"}, {"topic": "Algorithmic Decision-Making", "level": "City", "jurisdiction": "Santa Cruz, CA", "year": 2020, "policy": "Ordinance (Predictive Policing Ban)", "description": "Banned use of predictive policing technology by city departments.", "partisan": "Nonpartisan council", "status": "Active", "agency": "City of Santa Cruz PD", "source": "https://www.cityofsantacruz.com/"}, {"topic": "Algorithmic Decision-Making", "level": "City", "jurisdiction": "New Orleans, LA", "year": 2020, "policy": "Ordinance No. 033271", "description": "Banned use of predictive policing technology alongside facial recognition ban.", "partisan": "Democratic council", "status": "Active (facial recognition portion amended 2022)", "agency": "New Orleans PD", "source": "https://nola.gov/"}, {"topic": "Algorithmic Decision-Making", "level": "City", "jurisdiction": "Los Angeles, CA", "year": 2020, "policy": "LAPD Discontinuation of PredPol/Geolitica", "description": "LAPD discontinued use of PredPol predictive policing software following public pressure and audits showing racial bias.", "partisan": "Nonpartisan council (Democratic-leaning)", "status": "Active (discontinued)", "agency": "LAPD / LA Police Commission", "source": "https://www.lapdonline.org/"}, {"topic": "Algorithmic Decision-Making", "level": "State", "jurisdiction": "Utah", "year": 2024, "policy": "SB 149 (AI Policy Act)", "description": "Requires businesses using generative AI to disclose AI interaction to consumers.", "partisan": "Republican trifecta", "status": "Active", "agency": "Utah Dept. of Commerce AI Policy Office", "source": "https://le.utah.gov/~2024/bills/static/SB0149.html"}, {"topic": "Children's Online Safety", "level": "State", "jurisdiction": "California", "year": 2022, "policy": "AB 2273 (CA Age-Appropriate Design Code Act)", "description": "First U.S. AADC modeled on UK version; requires DPIAs for services likely accessed by minors; default high privacy settings.", "partisan": "Democratic trifecta", "status": "Partially enjoined (First Amendment challenge)", "agency": "California AG", "source": "https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202120220AB2273"}, {"topic": "Children's Online Safety", "level": "State", "jurisdiction": "Utah", "year": 2023, "policy": "SB 152 / HB 311 (Social Media Regulation Act)", "description": "Requires age verification and parental consent for minors on social media; curfew (10:30pm-6:30am); limits messaging.", "partisan": "Republican trifecta", "status": "Enjoined (preliminary injunction Sept 2024)", "agency": "Utah AG", "source": "https://le.utah.gov/~2023/bills/static/SB0152.html"}, {"topic": "Children's Online Safety", "level": "State", "jurisdiction": "Arkansas", "year": 2023, "policy": "SB 396 (Social Media Safety Act)", "description": "Requires social media platforms (>$100M revenue) to verify age of new users; parental consent for under-18.", "partisan": "Republican trifecta", "status": "Enjoined (preliminary injunction Aug 2023)", "agency": "Arkansas AG", "source": "https://www.arkleg.state.ar.us/Bills/Detail?id=SB396&ddBiennession=2023%2F2023R"}, {"topic": "Children's Online Safety", "level": "State", "jurisdiction": "Texas", "year": 2023, "policy": "HB 18 (SCOPE Act)", "description": "Requires digital service providers to get parental consent before minors under 18 create accounts.", "partisan": "Republican trifecta", "status": "Enjoined (pending appeal)", "agency": "Texas AG", "source": "https://capitol.texas.gov/BillLookup/History.aspx?LegSess=88R&Bill=HB18"}, {"topic": "Children's Online Safety", "level": "State", "jurisdiction": "Florida", "year": 2024, "policy": "HB 3 (Social Media for Minors)", "description": "Requires platforms to terminate accounts of users under 14; parental consent for ages 14-15.", "partisan": "Republican trifecta", "status": "Active", "agency": "Florida AG", "source": "https://www.flsenate.gov/Session/Bill/2024/3"}, {"topic": "Children's Online Safety", "level": "State", "jurisdiction": "Georgia", "year": 2024, "policy": "SB 351 (Protecting Georgia's Children on Social Media)", "description": "Requires age verification and parental consent for minors on social media; restricts school social media use.", "partisan": "Republican trifecta", "status": "Enjoined (June 2025)", "agency": "Georgia AG", "source": "https://www.legis.ga.gov/legislation/66753"}, {"topic": "Children's Online Safety", "level": "State", "jurisdiction": "New York", "year": 2024, "policy": "S.7694/A.8148 (SAFE for Kids Act) and S.7695/A.8149 (NY CHILD Act)", "description": "Requires parental consent before providing addictive algorithmic feeds to minors; restricts notification timing.", "partisan": "Democratic trifecta", "status": "Active", "agency": "New York AG", "source": "https://www.governor.ny.gov/news/governor-hochul-signs-landmark-legislation-protect-children-addictive-social-media-feeds"}, {"topic": "Children's Online Safety", "level": "State", "jurisdiction": "California", "year": 2024, "policy": "SB 976 (Protecting Kids from Social Media Addiction)", "description": "Prohibits platforms from providing addictive feeds to minors without parental consent; restricts late-night notifications.", "partisan": "Democratic trifecta", "status": "Active (age verification required by Dec 2026)", "agency": "California AG", "source": "https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202320240SB976"}, {"topic": "Children's Online Safety", "level": "State", "jurisdiction": "Maryland", "year": 2024, "policy": "Maryland Kids Code (Age Design Code)", "description": "AADC-style law requiring high default privacy settings for under-16 users; DPIAs for children's data processing.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Maryland AG", "source": "https://mgaleg.maryland.gov/mgawebsite/Legislation/Details/hb0603"}, {"topic": "Children's Online Safety", "level": "State", "jurisdiction": "Mississippi", "year": 2024, "policy": "HB 1126 (Walker Montgomery Act)", "description": "Requires social media platforms to verify age, obtain parental consent for minors, limit targeted advertising.", "partisan": "Republican trifecta", "status": "Active (enforcement proceeding during litigation)", "agency": "Mississippi AG", "source": "http://billstatus.ls.state.ms.us/2024/pdf/history/HB/HB1126.xml"}, {"topic": "Children's Online Safety", "level": "State", "jurisdiction": "Louisiana", "year": 2022, "policy": "Act 440 (Age Verification for Harmful Content)", "description": "First state to require age verification for websites with content harmful to minors (primarily pornographic).", "partisan": "Republican trifecta", "status": "Active", "agency": "Louisiana AG", "source": "https://www.legis.la.gov/legis/BillInfo.aspx?i=242292"}, {"topic": "Children's Online Safety", "level": "State", "jurisdiction": "Virginia", "year": 2024, "policy": "HB 854 / SB 359 (Social Media Time Limits)", "description": "Requires platforms to verify age; limits minors to one hour per day per app without parental consent.", "partisan": "Divided government", "status": "Active (effective 2025)", "agency": "Virginia AG", "source": "https://lis.virginia.gov/cgi-bin/legp604.exe?241+sum+HB854"}, {"topic": "Children's Online Safety", "level": "State", "jurisdiction": "Minnesota", "year": 2024, "policy": "HF 3488 (Minor Content Creator Protections)", "description": "Requires compensation and record-keeping for minors creating online content; modeled on child labor protections.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Minnesota Dept. of Labor and Industry", "source": "https://www.revisor.mn.gov/bills/text.php?number=HF3488&version=latest&session=ls93&session_year=2024"}, {"topic": "Data Centers", "level": "County", "jurisdiction": "Fairfax County, VA", "year": 2023, "policy": "Zoning Ordinance Amendment (Data Centers)", "description": "Restricted data center construction to certain zones; imposed noise limits; required setbacks from residential areas.", "partisan": "Nonpartisan board (Democratic-leaning)", "status": "Active", "agency": "Fairfax County Board of Supervisors", "source": "https://www.fairfaxcounty.gov/planning-development/zoning-ordinance"}, {"topic": "Data Centers", "level": "County", "jurisdiction": "Loudoun County, VA", "year": 2022, "policy": "Zoning Ordinance Amendments", "description": "Updated zoning for data centers in 'Data Center Alley'; imposed design standards and noise requirements.", "partisan": "Nonpartisan board", "status": "Active", "agency": "Loudoun County Planning & Zoning", "source": "https://www.loudoun.gov/4795/Data-Center-Information"}, {"topic": "Data Centers", "level": "County", "jurisdiction": "Prince William County, VA", "year": 2024, "policy": "Moratorium / Comprehensive Plan Update", "description": "Imposed temporary moratorium on new data center applications; updated comprehensive plan with siting standards.", "partisan": "Nonpartisan board (Democratic-leaning)", "status": "Active", "agency": "Prince William County Planning", "source": "https://www.pwcva.gov/"}, {"topic": "Data Centers", "level": "State", "jurisdiction": "Arkansas", "year": 2023, "policy": "Act 851 (Repeal of Municipal Preemption)", "description": "Rolled back 2021 laws that had preempted municipal noise ordinances for data centers and crypto mines.", "partisan": "Republican trifecta", "status": "Active", "agency": "Arkansas Legislature", "source": "https://www.arkleg.state.ar.us/Acts/FTPDocument?path=%2FACTS%2F2023R%2FPublic%2F&file=851.pdf"}, {"topic": "Data Centers", "level": "State", "jurisdiction": "Georgia", "year": 2024, "policy": "HB 1192 (Data Center Tax Incentive Reform)", "description": "Modified sales tax exemption requirements for data centers; added job creation thresholds.", "partisan": "Republican trifecta", "status": "Active", "agency": "Georgia Dept. of Revenue", "source": "https://www.legis.ga.gov/legislation/67034"}, {"topic": "Data Centers", "level": "State", "jurisdiction": "Virginia", "year": 2020, "policy": "Data Center Tax Incentive Program (Existing)", "description": "Longstanding sales and use tax exemption for data center equipment; one of the nation's most generous programs.", "partisan": "Divided government", "status": "Active", "agency": "Virginia Economic Development Partnership", "source": "https://www.vedp.org/incentive/data-center-tax-exemption"}, {"topic": "Data Centers", "level": "City", "jurisdiction": "Chandler, AZ", "year": 2023, "policy": "Zoning Code Update (Data Centers)", "description": "Updated zoning to address data center water consumption; imposed water recycling requirements.", "partisan": "Nonpartisan council", "status": "Active", "agency": "City of Chandler", "source": "https://www.chandleraz.gov/"}, {"topic": "Data Centers", "level": "State", "jurisdiction": "Oregon", "year": 2023, "policy": "HB 2074 (Data Center Tax Incentive Revision)", "description": "Revised enterprise zone tax incentives for data centers; added workforce and community benefit requirements.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Oregon Business Development Dept.", "source": "https://olis.oregonlegislature.gov/liz/2023R1/Measures/Overview/HB2074"}, {"topic": "Data Centers", "level": "County", "jurisdiction": "Chesterfield County, VA", "year": 2024, "policy": "Data Center Overlay District", "description": "Created overlay district with specific siting, noise, and screening requirements for data centers.", "partisan": "Nonpartisan board", "status": "Active", "agency": "Chesterfield County Planning", "source": "https://www.chesterfield.gov/"}, {"topic": "Data Centers", "level": "State", "jurisdiction": "Illinois", "year": 2019, "policy": "HB 2064 (Data Center Investment Program)", "description": "Created tax incentive program for data centers meeting investment thresholds; sales tax exemptions.", "partisan": "Democratic trifecta", "status": "Active", "agency": "Illinois DCEO", "source": "https://www2.illinois.gov/dceo/ExpandRelocate/Incentives/Pages/DataCenter.aspx"}, {"topic": "Data Centers", "level": "International", "jurisdiction": "Dublin, Ireland", "year": 2022, "policy": "EirGrid Connection Policy / Government Statement", "description": "Placed effective moratorium on new data center grid connections in Dublin area due to electricity capacity concerns.", "partisan": "Coalition government", "status": "Active (under review)", "agency": "EirGrid / Commission for Regulation of Utilities", "source": "https://www.eirgridgroup.com/"}, {"topic": "Data Centers", "level": "International", "jurisdiction": "Singapore", "year": 2019, "policy": "IMDA Data Centre Moratorium", "description": "Imposed moratorium on new data center construction due to energy and land constraints; selectively lifted in 2022.", "partisan": "Ruling party (PAP)", "status": "Partially lifted (2022)", "agency": "Infocomm Media Development Authority", "source": "https://www.imda.gov.sg/"}, {"topic": "Data Centers", "level": "International", "jurisdiction": "Amsterdam, Netherlands", "year": 2019, "policy": "Data Center Moratorium", "description": "Imposed temporary halt on new data center construction in Amsterdam metropolitan area over energy and space concerns.", "partisan": "Coalition", "status": "Expired (2020; new siting policies adopted)", "agency": "Municipality of Amsterdam", "source": "https://www.amsterdam.nl/"}];
+const DESCS = [{"topic": "License Plate Readers", "description": "Covers regulation of automated license plate reader (ALPR) systems used by law enforcement and, increasingly, private companies like Flock Safety. Policy interventions address data retention periods, authorized uses, audit requirements, data sharing restrictions, warrant requirements for historical queries, and public records exemptions. The rapid proliferation of networked ALPR cameras on streetlights and police vehicles has created vast databases of vehicle movement data with minimal oversight.", "why": "Federal law provides no specific ALPR framework, leaving states to fill the gap. Policing is fundamentally a state and local function, so decisions about what surveillance tools police may use and how long they may retain data fall naturally to state legislatures and city councils. Local variation also reflects genuine differences in community tolerance for surveillance: rural New Hampshire imposed a 3-minute retention limit while Georgia allows 30 months.", "example": "New Hampshire's RSA 261:75-b (2016) imposed the strictest ALPR data retention limit in the country at just 3 minutes unless data is connected to an active investigation, reflecting the state's strong libertarian privacy tradition."}, {"topic": "Facial Recognition Technology", "description": "Encompasses municipal bans, state moratoriums, and regulatory frameworks governing government use of facial recognition systems for identification and surveillance. Key issues include outright bans on government procurement, restrictions on law enforcement use, requirements for warrants or supervisor approval, prohibitions on sole-basis arrests, and notice requirements for defendants. The technology's documented racial bias and civil liberties implications have driven particularly intense local activism.", "why": "Congress has not enacted facial recognition legislation despite repeated proposals. Cities acted first because they have direct authority over their own police departments and municipal agencies, and because local advocacy organizations could mobilize residents around concrete, visible deployments. State legislatures followed with broader frameworks, but the first-mover dynamic was overwhelmingly municipal, driven by civil rights and privacy coalitions.", "example": "San Francisco's Stop Secret Surveillance Ordinance (2019) was the first law in the United States to ban government use of facial recognition technology, setting off a wave of similar bans in Oakland, Boston, Portland, Minneapolis, and over a dozen other cities."}, {"topic": "Surveillance Oversight", "description": "Covers ordinances requiring democratic oversight and public transparency before government agencies acquire or deploy surveillance technologies. Often called CCOPS (Community Control Over Police Surveillance) ordinances, these laws typically require city council or board of supervisors approval, community impact assessments, annual reporting, and sometimes sunset provisions for surveillance tools including drones, cell-site simulators, gunshot detection systems, social media monitoring tools, and body cameras.", "why": "Surveillance acquisition decisions are made by local police departments and municipal agencies using local budgets, placing them squarely within city council authority. Federal grants sometimes fund surveillance equipment but do not mandate oversight processes. These ordinances emerged from local privacy coalitions (notably the ACLU's Community Control model) who recognized that the approval decision happens at the procurement stage, which is a fundamentally local government function.", "example": "Seattle's Surveillance Ordinance (2017) requires the city council to approve any new surveillance technology before acquisition, mandates surveillance impact reports, and has been used to scrutinize everything from Amazon Ring partnerships to gunshot detection systems."}, {"topic": "Consumer Data Privacy", "description": "Encompasses comprehensive state privacy laws granting consumers rights over their personal data (access, deletion, correction, portability, opt-out of sale), as well as narrower laws covering biometric data, health data, neural data, and data broker registration. This is the single largest area of subnational tech policy activity, with 20 states enacting comprehensive frameworks between 2018 and 2024. Specific sub-areas like Illinois's Biometric Information Privacy Act have generated billions of dollars in litigation.", "why": "Congress has repeatedly failed to pass comprehensive federal privacy legislation (the American Data Privacy and Protection Act came closest in 2022 but stalled). States filled this vacuum, beginning with California's CCPA in 2018. The resulting patchwork has become self-reinforcing: each new state law creates compliance infrastructure that lowers the barrier for the next state, while the lack of federal preemption preserves state authority. Industry groups have paradoxically begun advocating for federal legislation precisely to preempt the state patchwork.", "example": "California's Consumer Privacy Act (2018), later amended by the California Privacy Rights Act (2020), was the first comprehensive U.S. state privacy law and remains the strongest, creating the California Privacy Protection Agency as the nation's first dedicated state privacy enforcement body."}, {"topic": "Gig Economy Worker Classification", "description": "Covers state and municipal laws addressing whether app-based platform workers (ride-hail drivers, delivery couriers) are employees or independent contractors, along with related minimum pay standards, benefits mandates, and deactivation protections. The core policy tension is between extending traditional employment protections to platform workers and preserving the flexibility that defines gig work. Some jurisdictions have created novel intermediate categories or sector-specific frameworks rather than forcing a binary classification.", "why": "Worker classification has historically been governed by state labor and employment law, with each state applying its own legal test (ABC test, economic reality test, or common law test). Cities entered the space because they have authority over local business licensing and minimum wage, and because gig economy impacts (congestion, competition with taxis) are felt most acutely at the municipal level. Federal rules (DOL's independent contractor rule) set a floor but do not preempt stronger state standards.", "example": "California's AB5 (2019) codified the ABC test presuming employee status, triggering a $200M+ industry campaign for Proposition 22 (2020), which exempted app-based drivers while providing limited benefits. The California Supreme Court upheld Prop 22 in 2024."}, {"topic": "Short-Term Rental Regulation", "description": "Covers city and state regulation of platforms like Airbnb and VRBO, including registration and licensing requirements, primary residence restrictions, annual night caps, data-sharing mandates between platforms and cities, zoning restrictions, and tax collection obligations. The policy debate centers on housing affordability (units diverted from long-term rental markets), neighborhood impacts (noise, transience), and the economic interests of hosts, hotel workers, and tourists.", "why": "Land use, zoning, and housing policy are core municipal functions, making cities the natural regulators of short-term rentals. Hotels have long been subject to local permitting and occupancy taxes, creating a clear regulatory precedent. State governments have occasionally intervened, sometimes to preempt restrictive local rules (as in Florida and Arizona) and sometimes to create statewide frameworks (as in New York's 2024 law). The politics are intensely local because impacts vary block by block.", "example": "New York City's Local Law 18 (2022, enforced from September 2023) is the most restrictive STR law in the United States: hosts must register, be present during stays, and rent only their primary residence. It reduced Airbnb listings in the city by over 90%."}, {"topic": "Autonomous Vehicles", "description": "Covers state laws authorizing testing and commercial deployment of self-driving vehicles, including permitting frameworks, insurance requirements, definitions of 'operator' and 'driver,' remote monitoring mandates, and liability allocation. Also includes municipal responses to robotaxi deployments, such as San Francisco's pushback against Waymo and Cruise expansion. Over 25 states have enacted AV legislation, with approaches ranging from highly permissive (Arizona, Texas) to highly structured (California).", "why": "Vehicle regulation in the U.S. is split: the federal government (NHTSA) regulates vehicle design and safety standards, while states regulate driver licensing, registration, insurance, and traffic law. Since AV legislation primarily addresses who may operate vehicles on state roads and under what conditions, it falls squarely within state authority. Cities have weighed in through resolutions and local traffic enforcement, particularly where robotaxi deployments have caused traffic disruptions or safety incidents.", "example": "Arizona's Executive Order 2015-09 made the state the most permissive AV testing environment in the country by allowing testing without prior permits, attracting Waymo, Uber, and Cruise to base operations there. This was later supplemented by Executive Order 2018-04."}, {"topic": "Broadband / Digital Divide", "description": "Covers municipal broadband networks, state laws enabling or preempting local broadband provision, digital equity programs, and state broadband offices created to coordinate investment. The core policy tension is between incumbent ISPs (who lobby for state preemption of municipal networks) and local governments seeking to provide affordable, high-speed internet as a public utility. COVID-19 dramatically accelerated state action after remote schooling and work exposed the depth of the digital divide.", "why": "Broadband infrastructure is built across public rights-of-way controlled by local governments, and internet service has historically been regulated at both state (public utility commissions) and local (franchise agreements) levels. Roughly 20 states passed laws restricting municipal broadband, often at industry behest, making the preemption-vs-enabling debate a fundamentally state-level issue. Federal BEAD funding ($42.5B) is administered through state broadband offices, further centering states as key actors.", "example": "Chattanooga, Tennessee's EPB Fiber Optics became the national model for municipal broadband after offering 10 Gbps symmetrical service through its city-owned electric utility, demonstrating that public networks could outperform private ISPs on speed, price, and reliability."}, {"topic": "Algorithmic Decision-Making", "description": "Covers regulation of automated systems used in consequential decisions including hiring (bias audits for AI screening tools), criminal justice (predictive policing bans, pretrial risk assessment oversight), and public benefits determinations. Also includes broader state AI governance frameworks like Colorado's comprehensive AI law requiring reasonable care to avoid algorithmic discrimination. The common thread is requiring transparency, accountability, and bias testing when algorithms influence outcomes that affect people's liberty, livelihood, or access to services.", "why": "Employment discrimination, criminal justice, and public benefits are all areas with strong state and local regulatory traditions. Cities acted first on predictive policing because they directly control their police departments. NYC passed the first AI hiring law because it has an unusually robust consumer protection apparatus (DCWP). State AI frameworks emerged later as legislatures recognized that algorithmic decision-making cuts across sectors. Federal agencies (EEOC, FTC) have issued guidance but no binding rules, leaving states and cities as the primary lawmakers.", "example": "New York City's Local Law 144 (2021, enforced from July 2023) was the first U.S. law requiring independent bias audits of automated employment decision tools, mandating public disclosure of audit results and candidate notification before AI is used in hiring or promotion decisions."}, {"topic": "Children's Online Safety", "description": "Covers state laws restricting minors' access to social media (age verification mandates, parental consent requirements), age-appropriate design codes modeled on the UK's framework (requiring platforms to default to high privacy settings for young users), content-specific age verification laws (primarily for pornographic material), school cellphone bans, and emerging laws targeting addictive algorithmic feeds and minor content creator protections. This became the single most active area of state tech legislation by 2024, with 48 laws enacted that year alone.", "why": "Children's safety is an area where bipartisan political will exists at the state level in ways it does not federally (COPPA, the main federal law, dates to 1998 and covers only children under 13). State attorneys general have been aggressive enforcers and legislative champions. The topic also crosses into education policy (school cellphone bans), which is almost entirely a state and local domain. However, many state laws have faced First Amendment challenges in federal court, creating significant legal uncertainty.", "example": "California's Age-Appropriate Design Code Act (2022) was the first U.S. law modeled on the UK's children's code, requiring data protection impact assessments and high default privacy settings for services likely accessed by minors. Although partially enjoined on First Amendment grounds, it inspired similar laws in Maryland, Connecticut, Nebraska, and Vermont."}, {"topic": "Data Centers", "description": "Covers local zoning ordinances, noise restrictions, water use requirements, and design standards for data center facilities, as well as state tax incentive programs (sales tax exemptions, enterprise zone benefits) designed to attract data center investment. The rapid growth of cloud computing and AI training has made data center siting an urgent land-use issue, particularly in Northern Virginia (which hosts the world's largest concentration of data centers), the Sun Belt, and parts of northern Europe.", "why": "Zoning and land use are quintessential local government functions, making municipal and county regulation the natural entry point. States are involved primarily through tax policy (incentive programs to attract investment) and energy regulation (public utility commissions managing grid capacity). The politics are local because data centers create concentrated impacts: noise, water consumption, energy demand, and visual blight affect nearby residents, while economic benefits (tax revenue, construction jobs) accrue more broadly. State preemption of local noise ordinances (as Arkansas attempted in 2021) has been contested.", "example": "Fairfax County, Virginia (2023) adopted zoning amendments restricting data center construction to specific zones, imposing noise limits, and requiring setbacks from residential areas, responding to resident complaints about the rapid buildout of facilities in the county that hosts a significant portion of global internet traffic."}];
+const SUMMARY = [{"topic": "License Plate Readers", "count": 14, "earliest": 2015, "latest": 2024}, {"topic": "Facial Recognition Technology", "count": 14, "earliest": 2019, "latest": 2024}, {"topic": "Surveillance Oversight", "count": 8, "earliest": 2017, "latest": 2020}, {"topic": "Consumer Data Privacy", "count": 24, "earliest": 2008, "latest": 2024}, {"topic": "Gig Economy Worker Classification", "count": 10, "earliest": 2019, "latest": 2024}, {"topic": "Short-Term Rental Regulation", "count": 11, "earliest": 2015, "latest": 2024}, {"topic": "Autonomous Vehicles", "count": 10, "earliest": 2011, "latest": 2024}, {"topic": "Broadband / Digital Divide", "count": 9, "earliest": 2015, "latest": 2023}, {"topic": "Algorithmic Decision-Making", "count": 8, "earliest": 2019, "latest": 2024}, {"topic": "Children's Online Safety", "count": 13, "earliest": 2022, "latest": 2024}, {"topic": "Data Centers", "count": 13, "earliest": 2019, "latest": 2024}, {"topic": "TOTAL", "count": 134, "earliest": null, "latest": null}];
+const TOPIC_COLORS = {"License Plate Readers": "#4a7c59", "Facial Recognition Technology": "#5b6abf", "Surveillance Oversight": "#c4652a", "Consumer Data Privacy": "#7b4ea3", "Gig Economy Worker Classification": "#bf5a3a", "Short-Term Rental Regulation": "#2a8a6a", "Autonomous Vehicles": "#a68b1b", "Broadband / Digital Divide": "#2980b9", "Algorithmic Decision-Making": "#c0392b", "Children's Online Safety": "#8e44ad", "Data Centers": "#566573"};
+
+let activeTopic = null;
+let sortCol = null;
+let sortAsc = true;
+
+function getStatusClass(status) {
+  if (!status) return 'status-other';
+  const s = status.toLowerCase();
+  if (s.includes('active')) return 'status-active';
+  if (s.includes('enjoin')) return 'status-enjoined';
+  if (s.includes('amend')) return 'status-amended';
+  if (s.includes('struck') || s.includes('repeal') || s.includes('expired')) return 'status-struck';
+  return 'status-other';
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function buildSummary() {
+  const bar = document.getElementById('summaryBar');
+  const grid = document.getElementById('summaryGrid');
+  const total = SUMMARY.reduce((a, s) => a + s.count, 0);
+
+  bar.innerHTML = SUMMARY.map(s => {
+    const pct = (s.count / total) * 100;
+    const color = TOPIC_COLORS[s.topic] || '#999';
+    return `<div class="segment" data-topic="${escapeHtml(s.topic)}" style="flex:${pct};background:${color}" title="${s.topic}: ${s.count}"></div>`;
+  }).join('');
+
+  grid.innerHTML = SUMMARY.map(s => {
+    const color = TOPIC_COLORS[s.topic] || '#999';
+    return `<div class="summary-card" data-topic="${escapeHtml(s.topic)}">
+      <span class="dot" style="background:${color}"></span>
+      <span class="label">${escapeHtml(s.topic)}</span>
+      <span class="count">${s.count}</span>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('.summary-card, .summary-bar .segment').forEach(el => {
+    el.addEventListener('click', () => toggleTopic(el.dataset.topic));
+  });
+}
+
+function toggleTopic(topic) {
+  const detail = document.getElementById('topicDetail');
+  if (activeTopic === topic) {
+    activeTopic = null;
+    detail.classList.remove('visible');
+    document.querySelectorAll('.summary-card').forEach(c => c.classList.remove('active'));
+    renderTable();
+    return;
+  }
+  activeTopic = topic;
+  document.querySelectorAll('.summary-card').forEach(c => {
+    c.classList.toggle('active', c.dataset.topic === topic);
+  });
+
+  const desc = DESCS.find(d => d.topic === topic);
+  if (desc) {
+    const color = TOPIC_COLORS[topic] || '#999';
+    detail.innerHTML = `<div class="topic-detail-inner">
+      <h3 style="color:${color}">${escapeHtml(desc.topic)}</h3>
+      <div class="field-label">Description</div>
+      <p>${escapeHtml(desc.description)}</p>
+      <div class="field-label">Why subnational regulation</div>
+      <p>${escapeHtml(desc.why)}</p>
+      <div class="field-label">Key example</div>
+      <p>${escapeHtml(desc.example)}</p>
+    </div>`;
+    detail.classList.add('visible');
+  }
+  renderTable();
+}
+
+function getFiltered() {
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  const level = document.getElementById('filterLevel').value;
+  const status = document.getElementById('filterStatus').value;
+  const partisan = document.getElementById('filterPartisan').value;
+
+  return DATA.filter(r => {
+    if (activeTopic && r.topic !== activeTopic) return false;
+    if (level && r.level !== level) return false;
+    if (status && !(r.status || '').toLowerCase().includes(status.toLowerCase())) return false;
+    if (partisan && !(r.partisan || '').toLowerCase().includes(partisan.toLowerCase())) return false;
+    if (q) {
+      const blob = [r.topic, r.level, r.jurisdiction, r.year, r.policy, r.description, r.partisan, r.status, r.agency].join(' ').toLowerCase();
+      return blob.includes(q);
+    }
+    return true;
+  });
+}
+
+function sortData(rows) {
+  if (!sortCol) return rows;
+  const key = sortCol;
+  return [...rows].sort((a, b) => {
+    let va = a[key] || '';
+    let vb = b[key] || '';
+    if (key === 'year') {
+      va = Number(va) || 0;
+      vb = Number(vb) || 0;
+    } else {
+      va = String(va).toLowerCase();
+      vb = String(vb).toLowerCase();
+    }
+    if (va < vb) return sortAsc ? -1 : 1;
+    if (va > vb) return sortAsc ? 1 : -1;
+    return 0;
+  });
+}
+
+function renderTable() {
+  const filtered = sortData(getFiltered());
+  const tbody = document.getElementById('tableBody');
+  document.getElementById('resultCount').textContent = filtered.length + ' of ' + DATA.length;
+
+  tbody.innerHTML = filtered.map(r => {
+    const color = TOPIC_COLORS[r.topic] || '#999';
+    const statusCls = getStatusClass(r.status);
+    const sourceLink = r.source ? `<a href="${escapeHtml(r.source)}" target="_blank" rel="noopener">source</a>` : '';
+    return `<tr>
+      <td class="topic-cell"><span class="topic-badge" style="background:${color}"></span>${escapeHtml(r.topic)}</td>
+      <td>${escapeHtml(r.level)} / ${escapeHtml(r.jurisdiction)}</td>
+      <td class="year-cell">${r.year}</td>
+      <td class="policy-cell">${escapeHtml(r.policy)}</td>
+      <td class="desc-cell">${escapeHtml(r.description)}</td>
+      <td>${escapeHtml(r.partisan)}</td>
+      <td><span class="status-tag ${statusCls}">${escapeHtml(r.status)}</span></td>
+      <td>${escapeHtml(r.agency)}</td>
+      <td class="source-cell">${sourceLink}</td>
+    </tr>`;
+  }).join('');
+}
+
+const colMap = {
+  topic: 'topic',
+  jurisdiction: 'jurisdiction',
+  year: 'year',
+  policy: 'policy',
+  description: 'description',
+  partisan: 'partisan',
+  status: 'status',
+  agency: 'agency'
+};
+
+document.querySelectorAll('thead th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = colMap[th.dataset.col];
+    if (sortCol === col) {
+      sortAsc = !sortAsc;
+    } else {
+      sortCol = col;
+      sortAsc = true;
+    }
+    document.querySelectorAll('thead th').forEach(h => h.classList.remove('sorted'));
+    th.classList.add('sorted');
+    th.querySelector('.sort-arrow').textContent = sortAsc ? '\u25B2' : '\u25BC';
+    renderTable();
+  });
+});
+
+document.getElementById('searchBox').addEventListener('input', renderTable);
+document.getElementById('filterLevel').addEventListener('change', renderTable);
+document.getElementById('filterStatus').addEventListener('change', renderTable);
+document.getElementById('filterPartisan').addEventListener('change', renderTable);
+
+buildSummary();
+renderTable();
+</script>
+</body>
+</html>
